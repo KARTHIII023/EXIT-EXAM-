@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Type Predictor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <main class="shell">
+        <section class="intro">
+            <p class="eyebrow">Random forest classifier</p>
+            <h1>Find the<br><em>Pokemon with me.</em></h1>
+            <p class="lede">Enter the measured stats below and the trained model will estimate the most likely type.</p>
+            <div class="model-note"><span class="status-dot"></span><span>23 trained features connected</span></div>
+        </section>
+        <section class="panel">
+            <div class="panel-heading">
+                <p class="eyebrow">Input profile</p>
+                <h2>Pokemon statistics</h2>
+            </div>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert" role="alert">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            <form action="{{ url_for('predict') }}" method="post">
+                <div class="field-grid">
+                    {% for column in numeric_columns %}
+                        <label class="field">
+                            <span>{{ display_name(column) }}</span>
+                            <input type="number" name="{{ column }}" step="any" required value="{{ request.form.get(column, '') }}">
+                        </label>
+                    {% endfor %}
+                </div>
+                <label class="field select-field">
+                    <span>Secondary type</span>
+                    <select name="type_2">
+                        <option value="">None</option>
+                        {% for category in category_options %}
+                            <option value="{{ category }}" {% if request.form.get('type_2') == category %}selected{% endif %}>{{ category|title }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <button type="submit">Predict type <span aria-hidden="true">→</span></button>
+            </form>
+        </section>
+    </main>
+</body>
+</html>
